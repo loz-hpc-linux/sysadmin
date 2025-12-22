@@ -258,6 +258,62 @@ Usage: ./serialNumber.sh [OPTIONS] xname
 Options:
 -h => Display this help
 
-Script 14 = 
+Script 14 = HPE CRAY - Hardware triage tool
+
+exb-ncn-m001:~ # /opt/clmgr/hardware-triage-tool/hwtriage -h
+usage: hwtriage [-h] [-r] [-n NODE_NAME] [-u USERNAME] [-p PASSWORD]
+                [-l LOGPATH] [-ns {On,Off}]
+                [-hw {ex235a,ex255a,ex254n,ex4252,ex425,ex235n}] [-ls]
+                [-bs BEGIN_STAGE] [-rs RUN_STAGE] [-f INPUT_YAML]
+                [-hy HARDWARE_YAML] [-sn] [-sno] [-k SSH_KEY] [-t TIMEOUT]
+                [-v] [-cpath CUSTOM_LOG_PATH]
+
+This is a triaging tool which checks the nodes for various issues and produces
+the same on the console. It accepts nodename as the required argument and
+multiple optional arguments which can be passed as needed. The description of
+the arguments are displayed below.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -r, --revision        Show the revision and exit.
+  -n NODE_NAME, --node-name NODE_NAME
+                        Enter the node name to perform the checks
+  -u USERNAME, --username USERNAME
+                        Username to access node controller and the redfish
+                        calls
+  -p PASSWORD, --password PASSWORD
+                        Password to access node controller and redfish calls
+  -l LOGPATH, --logpath LOGPATH
+                        Provide the full log path to perform the checks
+  -ns {On,Off}, --node-state {On,Off}
+                        Provide the node power state
+  -hw {ex235a,ex255a,ex254n,ex4252,ex425,ex235n}, --hardware {ex235a,ex255a,ex254n,ex4252,ex425,ex235n}
+                        Provide the node hardware type
+  -ls, --list-stages    To list stages in a yaml file
+  -bs BEGIN_STAGE, --begin-stage BEGIN_STAGE
+                        Enter the stage name from where the check will start
+  -rs RUN_STAGE, --run-stage RUN_STAGE
+                        To run only one stage from yaml file
+  -f INPUT_YAML, --input-yaml INPUT_YAML
+                        To pass an input config yml file as input
+  -hy HARDWARE_YAML, --hardware-yaml HARDWARE_YAML
+                        To pass a hardware config yml file as input
+  -sn, --show-serial-number
+                        To display the serial number info with the triage
+                        result
+  -sno, --serial-number-only
+                        Collect the serial numbers into a file without
+                        triaging
+  -k SSH_KEY, --ssh-key SSH_KEY
+                        Ssh key to enable passwordless ssh
+  -t TIMEOUT, --timeout TIMEOUT
+                        Timeout duration for collecting logs in seconds,
+                        default=120
+  -v, --verbose         To have a verbose output
+  -cpath CUSTOM_LOG_PATH, --custom-log-path CUSTOM_LOG_PATH
+                        Provide the custom log path to store the triage logs
+                        in the case to override the default log path
+
+Script 15 = 
 
 
