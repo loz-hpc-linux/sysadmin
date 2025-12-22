@@ -316,6 +316,23 @@ optional arguments:
 
 Script 15 = HWTRIAGE CALLER
 
+Script 16 = PREPARE SLOT - safety script
 
+exa-ncn-m001:/opt/cray/hpe-admin/site-team/scripts # ./prepareSlot.sh -h
+Usage: ./prepareSlot.sh [-d] [-h] -e [END_TIME] -s [START_TIME] -a ACTION -t [TICKET] -x NODE_XNAME [-l LOGIN_NODE]
+
+Parameters:
+-a => Action. Valid values are: syscheck, down, reserveNode, reserveSlot, unreserve, clean, and up
+-x => Node ID following XNAME convention. Eg.: x9000c1s1b0n0
+
+Options:
+-d => Display debug messages in STDOUT
+-e => Reservation end time. Defaults to +56 days
+-h => Display this help
+-s => Reservation start time. Defaults +4 sec
+-t => Ticket ID where work is being tracked. Eg.: UKMET-1234 / SFDC 123456789
+-l => Specify non default login node (in event default fails) Eg.: login03
+
+Script 17 = 
 
 
