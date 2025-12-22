@@ -1,4 +1,4 @@
-Scipt 1 = 
+Scipt 1 = CPU TYPE
 
 exa-ncn-m001:/scratch/laurence # ./cpu_type.sh x1003c1s7b0n0
 - Checking CPU info on x1003c1s7b0n0...
@@ -7,11 +7,11 @@ exa-ncn-m001:/scratch/laurence # ./cpu_type.sh x1003c1s7b0n0
 - Model number : 1
 - Detected: AMD EPYC 7xxx → Milan
 
-Script 2 = 
+Script 2 = FUNCTIONS
 
 functions.sh - required for the running of scripts in this repository 
 
-Script 3 = 
+Script 3 = AUTO LOG SCAN
 
 exa-ncn-m001:/scratch/laurence # ./log_scan.sh -h
 Usage:
@@ -36,7 +36,7 @@ Notes:
 Examples:
   ./log_scan_slot.sh x1102c7s2
 
-Script 4 = 
+Script 4 = LOG SEARCH USING PATTERN
 
 exa-ncn-m001:/scratch/laurence # ./log_search.sh -h
 Usage:
@@ -64,4 +64,43 @@ Examples:
   ./log_search.sh -p "VDDCR_CPUB|VDD_1V1_S3"
   ./log_search.sh -B 50 -A 50 -p "SensorReadError|PowerError"
 
-Script 5 = 
+Script 5 = NODE SWEEP REPORT (PBS)
+
+exa-ncn-m001:/scratch/laurence # ./node_sweep_report.sh -h
+Usage:
+  node_sweep_classify.sh [OPTIONS]
+
+Description:
+  Runs sweepPBSNodes.sh, parses the output, and classifies nodes into:
+    - Existing: nodes already linked to UKMET-* tickets
+    - New: nodes without tickets or with NHC / communication-closed issues
+
+  Intended for rapid triage and Slack/Jira handover prep.
+
+Options:
+  -h, --help    Show this help menu and exit
+
+Behavior:
+  - Executes: /opt/cray/hpe-admin/site-team/scripts/sweepPBSNodes.sh
+  - Preserves the "Node Summary" section from the sweep output
+  - Ignores nodes with a comment of 'null'
+  - Classification rules:
+      * UKMET-*        → Existing
+      * NHC            → New
+      * communication closed → New
+      * anything else  → New
+
+Requirements:
+  - sweepPBSNodes.sh must be executable
+  - awk, sort, mktemp must be available
+  - Script must be run on a system with PBS visibility
+
+Examples:
+  ./node_sweep_classify.sh
+  ./node_sweep_classify.sh --help
+
+Notes:
+  - Output is written to stdout only
+  - Temporary files are cleaned up automatically
+
+Script 6 = 
