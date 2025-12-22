@@ -167,3 +167,40 @@ Notes:
   - Intended for human-readable triage, not machine parsing
 
 Script 9 = SETUP ENVIRONMENT
+
+exa-ncn-m001:/scratch/laurence # ./setup_env.sh -h
+
+🔧 setup_env.sh - Node triage environment setup
+
+Usage:
+  source ./setup_env.sh
+
+This script will:
+  - Prompt for TICKET (e.g UKEMT-3555-LH) and NID(e.g nidd3493)
+  - Resolve BMC, SLOT, CHASSIS, and node lists
+  - Optionally apply a custom command prompt
+  - Optionally lock variables as readonly
+  - Export all variables for use in current session
+
+❗ IMPORTANT: This script must be sourced to modify your current shell.
+   Running it as './setup_env.sh' will NOT work as intended.
+
+Script 10 = STATUS CHECKER  - pbs sat 
+
+exa-ncn-m001:/scratch/laurence # ./status_check.sh -h
+
+Usage: ./status_check.sh <SLOT>
+
+Description:
+  Checks PBS node status and SAT system state for all nodes in the given SLOT.
+
+Requirements:
+  - Run set_env.sh first to set the following variables:
+      $SYSTEM_NAME, $NODES_XNAME, $SLOT
+  - PBS output is fetched from the correct login node via SSH.
+
+Example:
+  ./status_check.sh x9000c3s0
+
+Script 11 = 
+
