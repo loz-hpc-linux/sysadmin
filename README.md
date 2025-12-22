@@ -105,4 +105,21 @@ Notes:
 
 Script 6 = PBS FUNCTION (required for other scripts - has to be separate to functions.sh)
 
-Script 7 = 
+Script 7 = PING NODES
+
+exa-ncn-m001:/scratch/laurence # ./ping_nodes.sh -h
+
+📘 Usage: ./ping_nodes.sh <XNAME>
+    Example: ./ping_nodes.sh x1102c7s2b0n2
+    Example: ./ping_nodes.sh $XNAME
+
+🔧 Description:
+    This script pings all nodes on a blade and reports their online status.
+
+📦 Required Environment Variables:
+    - $NODES_XNAME   (used to detect if blade is Windom or Antero)
+
+🧪 Recommended:
+    Run 'setup_env.sh' before this script to populate environment vars.
+
+Script 8 = 
