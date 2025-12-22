@@ -250,5 +250,14 @@ EXAMPLES
 
 Script 12 = CMM KEY FUNCTION
 
+Script 13 = SERIAL NUMBER CAPTURE
+
+exa-ncn-m001:/opt/cray/hpe-admin/site-team/scripts # ./serialNumber.sh -h
+Usage: ./serialNumber.sh [OPTIONS] xname
+
+Options:
+-h => Display this help
+
+Script 14 = 
 
 
