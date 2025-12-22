@@ -38,4 +38,30 @@ Examples:
 
 Script 4 = 
 
+exa-ncn-m001:/scratch/laurence # ./log_search.sh -h
+Usage:
+  log_search.sh [-h] [-B <before>] [-A <after>] [-p "<pattern>"]
 
+Description:
+  - Prompts for a search pattern if -p is omitted (extended regex, case-insensitive).
+  - Searches BOTH on the remote BMC:
+      /var/log/messages
+      /var/log/n*/current
+  - Finds the LAST match across those files and prints <before>/<after> lines of context.
+
+Options:
+  -h              Show this help and exit
+  -B <before>     Lines BEFORE the match (default: 30)
+  -A <after>      Lines AFTER the match  (default: 30)
+  -p "<pattern>"  ERE pattern (quote it if it includes | or spaces)
+
+Environment detection:
+  Requires $BMC to be set. If it's not set, run:
+    source /opt/cray/hpe-admin/site-team/scripts/lharding/setup_env.sh
+
+Examples:
+  ./log_search.sh
+  ./log_search.sh -p "VDDCR_CPUB|VDD_1V1_S3"
+  ./log_search.sh -B 50 -A 50 -p "SensorReadError|PowerError"
+
+Script 5 = 
