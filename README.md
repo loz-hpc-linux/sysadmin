@@ -202,5 +202,53 @@ Requirements:
 Example:
   ./status_check.sh x9000c3s0
 
-Script 11 = 
+Script 11 = SWEEP PBS NODES
+
+exa-ncn-m001:/scratch/laurence # ./sweepPBSNodes.sh -h
+sweepPBSNodes.sh — Scan PBS nodes and print a filtered summary.
+
+SYNOPSIS
+  sweepPBSNodes.sh
+  SYSTEM_NAME must already be exported (e.g., exa, exb, exc, exd, exe, exy, exz).
+
+WHAT IT DOES (filters applied)
+  1) For nida / nib / nic / nidc / nidd / nidy / nidx prefixes (derived from SYSTEM_NAME):
+     - Drop any row whose STATE list contains any of:
+         free, busy, job-exclusive
+       (STATE may be a comma-separated list; matching is token-aware.)
+
+  2) Extra rule for nidd:
+     - If comment equals "COLLABORATION" (case-insensitive),
+       KEEP the row ONLY when state is exactly "offline" or exactly "down".
+       Otherwise drop it.
+
+  3) nide special handling (legacy panel shown when SYSTEM_NAME ends with "d"):
+     - Show ONLY nide rows that contain "down" (anywhere in the row),
+       EXCLUDING the converted ranges below.
+
+EXCLUSIONS (nide ranges that were converted to nidd compute nodes)
+  nide[1129-1159,1161-1191,1385-1415,1417,1641-1671]
+
+OUTPUT
+  - Prints a summary count by node state, then a formatted table:
+      host switch worktype state comment
+  - Prints "Clean!" if no rows survive filtering.
+
+DEPENDENCIES
+  - functions.sh (provides loginNode)
+  - jq, awk, sort, ssh
+  - PBS server reachable from the SSH login host
+
+NOTES
+  - The script pulls data via: ssh $(loginNode "$SYSTEM_NAME") pbsnodes -F json -a
+  - Null/missing JSON fields are handled safely.
+  - "job-exclusive" is matched as an exact token in the STATE list, not as a substring.
+
+EXAMPLES
+  SYSTEM_NAME=exd ./sweepPBSNodes.sh
+  SYSTEM_NAME=exa ./sweepPBSNodes.sh
+
+Script 12 = CMM KEY FUNCTION
+
+
 
