@@ -103,4 +103,6 @@ Notes:
   - Output is written to stdout only
   - Temporary files are cleaned up automatically
 
-Script 6 = 
+Script 6 = PBS FUNCTION (required for other scripts - has to be separate to functions.sh)
+
+Script 7 = 
