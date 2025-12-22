@@ -1,338 +1,240 @@
-Scipt 1 = CPU TYPE
+HPC Node Triage & Sweep Toolkit
 
-exa-ncn-m001:/scratch/laurence # ./cpu_type.sh x1003c1s7b0n0
-- Checking CPU info on x1003c1s7b0n0...
-- Model name   : AMD EPYC 7763 64-Core Processor
-- CPU family   : 25
-- Model number : 1
-- Detected: AMD EPYC 7xxx → Milan
+A practical collection of Bash utilities for HPE Cray EX systems used to triage node failures, scan logs, validate hardware state, and summarise PBS/SAT health during incident response.
 
-Script 2 = FUNCTIONS
+This repository is written for operators doing real incident work, not for demonstrations or automation theatre.
 
-functions.sh - required for the running of scripts in this repository 
+Prerequisites
 
-Script 3 = AUTO LOG SCAN
+Bash
 
-exa-ncn-m001:/scratch/laurence # ./log_scan.sh -h
-Usage:
-  log_scan_slot.sh <SLOT>
+SSH access to login nodes, compute nodes, and BMCs
 
-Description:
-  Runs a set of standard greps over /var/log/n*/current and /var/log/messages
-  on both sides of a slot (<SLOT>b0 and <SLOT>b1) via SSH.
+/etc/cray/nidX present
 
-Arguments:
-  SLOT          Slot identifier that resolves via /etc/cray/nidX
-                Example: x1102c7s2  (script will SSH to x1102c7s2b0 and x1102c7s2b1)
+cluset, jq, awk, sort
 
-Options:
-  -h, --help    Show this help menu and exit
+PBS visibility from login nodes
 
-Notes:
-  - Requires SSH access to ${SLOT}b0 and ${SLOT}b1.
-  - Uses /etc/cray/nidX for xname<->nid lookups.
-  - cluset must be available for the NODES_* expansions.
+Appropriate privileges for Redfish and Cray tooling
 
-Examples:
-  ./log_scan_slot.sh x1102c7s2
+Most scripts are expected to be run from an NCN or equivalent admin node.
 
-Script 4 = LOG SEARCH USING PATTERN
+Recommended Workflow
 
-exa-ncn-m001:/scratch/laurence # ./log_search.sh -h
-Usage:
-  log_search.sh [-h] [-B <before>] [-A <after>] [-p "<pattern>"]
+Source the environment
+source setup_env.sh
 
-Description:
-  - Prompts for a search pattern if -p is omitted (extended regex, case-insensitive).
-  - Searches BOTH on the remote BMC:
-      /var/log/messages
-      /var/log/n*/current
-  - Finds the LAST match across those files and prints <before>/<after> lines of context.
+Run system-wide sweeps
+./run_sweeps.sh
 
-Options:
-  -h              Show this help and exit
-  -B <before>     Lines BEFORE the match (default: 30)
-  -A <after>      Lines AFTER the match  (default: 30)
-  -p "<pattern>"  ERE pattern (quote it if it includes | or spaces)
+Investigate a specific slot
+./log_scan.sh x1102c7s2
 
-Environment detection:
-  Requires $BMC to be set. If it's not set, run:
-    source /opt/cray/hpe-admin/site-team/scripts/lharding/setup_env.sh
+Perform a targeted log search if required
+./log_search.sh -p "PowerError|SensorReadError"
 
-Examples:
-  ./log_search.sh
-  ./log_search.sh -p "VDDCR_CPUB|VDD_1V1_S3"
-  ./log_search.sh -B 50 -A 50 -p "SensorReadError|PowerError"
+Validate PBS and SAT status
+./status_check.sh x1102c7s2
 
-Script 5 = NODE SWEEP REPORT (PBS)
+Script Reference
 
-exa-ncn-m001:/scratch/laurence # ./node_sweep_report.sh -h
-Usage:
-  node_sweep_classify.sh [OPTIONS]
+Script 1: cpu_type.sh — CPU Identification
 
-Description:
-  Runs sweepPBSNodes.sh, parses the output, and classifies nodes into:
-    - Existing: nodes already linked to UKMET-* tickets
-    - New: nodes without tickets or with NHC / communication-closed issues
-
-  Intended for rapid triage and Slack/Jira handover prep.
-
-Options:
-  -h, --help    Show this help menu and exit
-
-Behavior:
-  - Executes: /opt/cray/hpe-admin/site-team/scripts/sweepPBSNodes.sh
-  - Preserves the "Node Summary" section from the sweep output
-  - Ignores nodes with a comment of 'null'
-  - Classification rules:
-      * UKMET-*        → Existing
-      * NHC            → New
-      * communication closed → New
-      * anything else  → New
-
-Requirements:
-  - sweepPBSNodes.sh must be executable
-  - awk, sort, mktemp must be available
-  - Script must be run on a system with PBS visibility
-
-Examples:
-  ./node_sweep_classify.sh
-  ./node_sweep_classify.sh --help
-
-Notes:
-  - Output is written to stdout only
-  - Temporary files are cleaned up automatically
-
-Script 6 = PBS FUNCTION (required for other scripts - has to be separate to functions.sh)
-
-Script 7 = PING NODES
-
-exa-ncn-m001:/scratch/laurence # ./ping_nodes.sh -h
-
-📘 Usage: ./ping_nodes.sh <XNAME>
-    Example: ./ping_nodes.sh x1102c7s2b0n2
-    Example: ./ping_nodes.sh $XNAME
-
-🔧 Description:
-    This script pings all nodes on a blade and reports their online status.
-
-📦 Required Environment Variables:
-    - $NODES_XNAME   (used to detect if blade is Windom or Antero)
-
-🧪 Recommended:
-    Run 'setup_env.sh' before this script to populate environment vars.
-
-Script 8 = RUN SWEEPS
-
-exa-ncn-m001:/scratch/laurence # ./run_sweeps.sh -h
-Usage:
-  run_sweeps.sh [OPTIONS]
-
-Description:
-  Orchestrates multiple sweep and reporting scripts, running each in sequence
-  and clearly labeling their output with timestamps and status.
-
-  Designed as a single-entry triage launcher for daily or ad-hoc health checks.
-
-Options:
-  -h, --help    Show this help menu and exit
-  --no-color    Disable colored output (useful for logs or CI capture)
-
-Executed Scripts (in order):
-  1. sweepPBSNodes.sh
-     - Collects PBS node state and failure summaries
-  2. node_sweep_report.sh
-     - Post-processes sweep results into classified output
-  3. sweepCray.sh
-     - Performs Cray-level health and reachability checks
-
-Behavior:
-  - Each script is checked for executability before running
-  - Output is wrapped with a timestamped header
-  - Exit codes are captured and reported per script
-  - Execution continues even if one script fails
-
-Requirements:
-  - Bash
-  - Executable permissions on all referenced scripts
-  - Sufficient privileges to query PBS and Cray management services
-
-Examples:
-  ./run_sweeps.sh
-  ./run_sweeps.sh --no-color
-  ./run_sweeps.sh --help
-
-Notes:
-  - This script does not modify system state
-  - Intended for human-readable triage, not machine parsing
-
-Script 9 = SETUP ENVIRONMENT
-
-exa-ncn-m001:/scratch/laurence # ./setup_env.sh -h
-
-🔧 setup_env.sh - Node triage environment setup
-
-Usage:
-  source ./setup_env.sh
-
-This script will:
-  - Prompt for TICKET (e.g UKEMT-3555-LH) and NID(e.g nidd3493)
-  - Resolve BMC, SLOT, CHASSIS, and node lists
-  - Optionally apply a custom command prompt
-  - Optionally lock variables as readonly
-  - Export all variables for use in current session
-
-❗ IMPORTANT: This script must be sourced to modify your current shell.
-   Running it as './setup_env.sh' will NOT work as intended.
-
-Script 10 = STATUS CHECKER  - pbs sat 
-
-exa-ncn-m001:/scratch/laurence # ./status_check.sh -h
-
-Usage: ./status_check.sh <SLOT>
-
-Description:
-  Checks PBS node status and SAT system state for all nodes in the given SLOT.
-
-Requirements:
-  - Run set_env.sh first to set the following variables:
-      $SYSTEM_NAME, $NODES_XNAME, $SLOT
-  - PBS output is fetched from the correct login node via SSH.
+Identifies CPU model, family, and inferred generation.
 
 Example:
-  ./status_check.sh x9000c3s0
+./cpu_type.sh x1003c1s7b0n0
 
-Script 11 = SWEEP PBS NODES
+Outputs CPU model details and architecture (e.g. Milan).
 
-exa-ncn-m001:/scratch/laurence # ./sweepPBSNodes.sh -h
-sweepPBSNodes.sh — Scan PBS nodes and print a filtered summary.
+Script 2: functions.sh — Shared Functions
 
-SYNOPSIS
-  sweepPBSNodes.sh
-  SYSTEM_NAME must already be exported (e.g., exa, exb, exc, exd, exe, exy, exz).
+Core helper functions required by most scripts in this repository.
 
-WHAT IT DOES (filters applied)
-  1) For nida / nib / nic / nidc / nidd / nidy / nidx prefixes (derived from SYSTEM_NAME):
-     - Drop any row whose STATE list contains any of:
-         free, busy, job-exclusive
-       (STATE may be a comma-separated list; matching is token-aware.)
+This file must remain separate and must not be inlined or removed.
 
-  2) Extra rule for nidd:
-     - If comment equals "COLLABORATION" (case-insensitive),
-       KEEP the row ONLY when state is exactly "offline" or exactly "down".
-       Otherwise drop it.
+Script 3: log_scan.sh — Automated Slot Log Scan
 
-  3) nide special handling (legacy panel shown when SYSTEM_NAME ends with "d"):
-     - Show ONLY nide rows that contain "down" (anywhere in the row),
-       EXCLUDING the converted ranges below.
+Runs standard greps across both sides of a slot (b0 and b1).
 
-EXCLUSIONS (nide ranges that were converted to nidd compute nodes)
-  nide[1129-1159,1161-1191,1385-1415,1417,1641-1671]
+Scans:
 
-OUTPUT
-  - Prints a summary count by node state, then a formatted table:
-      host switch worktype state comment
-  - Prints "Clean!" if no rows survive filtering.
+/var/log/n*/current
 
-DEPENDENCIES
-  - functions.sh (provides loginNode)
-  - jq, awk, sort, ssh
-  - PBS server reachable from the SSH login host
+/var/log/messages
 
-NOTES
-  - The script pulls data via: ssh $(loginNode "$SYSTEM_NAME") pbsnodes -F json -a
-  - Null/missing JSON fields are handled safely.
-  - "job-exclusive" is matched as an exact token in the STATE list, not as a substring.
+Searches for common failure indicators including:
+failed, error, power, PCIe, MCE, MCA, squashfs, hsn
 
-EXAMPLES
-  SYSTEM_NAME=exd ./sweepPBSNodes.sh
-  SYSTEM_NAME=exa ./sweepPBSNodes.sh
+Example:
+./log_scan.sh x1102c7s2
 
-Script 12 = CMM KEY FUNCTION
+Script 4: log_search.sh — Pattern-Based Log Search (BMC)
 
-Script 13 = SERIAL NUMBER CAPTURE
+Finds the last occurrence of a pattern and prints surrounding context.
 
-exa-ncn-m001:/opt/cray/hpe-admin/site-team/scripts # ./serialNumber.sh -h
-Usage: ./serialNumber.sh [OPTIONS] xname
+Features:
 
-Options:
--h => Display this help
+Case-insensitive extended regex
 
-Script 14 = HPE CRAY - Hardware triage tool
+Configurable context lines before and after
 
-exb-ncn-m001:~ # /opt/clmgr/hardware-triage-tool/hwtriage -h
-usage: hwtriage [-h] [-r] [-n NODE_NAME] [-u USERNAME] [-p PASSWORD]
-                [-l LOGPATH] [-ns {On,Off}]
-                [-hw {ex235a,ex255a,ex254n,ex4252,ex425,ex235n}] [-ls]
-                [-bs BEGIN_STAGE] [-rs RUN_STAGE] [-f INPUT_YAML]
-                [-hy HARDWARE_YAML] [-sn] [-sno] [-k SSH_KEY] [-t TIMEOUT]
-                [-v] [-cpath CUSTOM_LOG_PATH]
+Searches both messages and n*/current logs on the BMC
 
-This is a triaging tool which checks the nodes for various issues and produces
-the same on the console. It accepts nodename as the required argument and
-multiple optional arguments which can be passed as needed. The description of
-the arguments are displayed below.
+Requires $BMC to be set (use setup_env.sh).
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -r, --revision        Show the revision and exit.
-  -n NODE_NAME, --node-name NODE_NAME
-                        Enter the node name to perform the checks
-  -u USERNAME, --username USERNAME
-                        Username to access node controller and the redfish
-                        calls
-  -p PASSWORD, --password PASSWORD
-                        Password to access node controller and redfish calls
-  -l LOGPATH, --logpath LOGPATH
-                        Provide the full log path to perform the checks
-  -ns {On,Off}, --node-state {On,Off}
-                        Provide the node power state
-  -hw {ex235a,ex255a,ex254n,ex4252,ex425,ex235n}, --hardware {ex235a,ex255a,ex254n,ex4252,ex425,ex235n}
-                        Provide the node hardware type
-  -ls, --list-stages    To list stages in a yaml file
-  -bs BEGIN_STAGE, --begin-stage BEGIN_STAGE
-                        Enter the stage name from where the check will start
-  -rs RUN_STAGE, --run-stage RUN_STAGE
-                        To run only one stage from yaml file
-  -f INPUT_YAML, --input-yaml INPUT_YAML
-                        To pass an input config yml file as input
-  -hy HARDWARE_YAML, --hardware-yaml HARDWARE_YAML
-                        To pass a hardware config yml file as input
-  -sn, --show-serial-number
-                        To display the serial number info with the triage
-                        result
-  -sno, --serial-number-only
-                        Collect the serial numbers into a file without
-                        triaging
-  -k SSH_KEY, --ssh-key SSH_KEY
-                        Ssh key to enable passwordless ssh
-  -t TIMEOUT, --timeout TIMEOUT
-                        Timeout duration for collecting logs in seconds,
-                        default=120
-  -v, --verbose         To have a verbose output
-  -cpath CUSTOM_LOG_PATH, --custom-log-path CUSTOM_LOG_PATH
-                        Provide the custom log path to store the triage logs
-                        in the case to override the default log path
+Examples:
+./log_search.sh
+./log_search.sh -p "VDDCR_CPUB|VDD_1V1_S3"
+./log_search.sh -B 50 -A 50 -p "SensorReadError|PowerError"
 
-Script 15 = HWTRIAGE CALLER
+Script 5: node_sweep_report.sh — PBS Node Classification
 
-Script 16 = PREPARE SLOT - safety script
+Runs sweepPBSNodes.sh and classifies nodes into:
 
-exa-ncn-m001:/opt/cray/hpe-admin/site-team/scripts # ./prepareSlot.sh -h
-Usage: ./prepareSlot.sh [-d] [-h] -e [END_TIME] -s [START_TIME] -a ACTION -t [TICKET] -x NODE_XNAME [-l LOGIN_NODE]
+Existing
 
-Parameters:
--a => Action. Valid values are: syscheck, down, reserveNode, reserveSlot, unreserve, clean, and up
--x => Node ID following XNAME convention. Eg.: x9000c1s1b0n0
+Nodes already linked to UKMET-* tickets
 
-Options:
--d => Display debug messages in STDOUT
--e => Reservation end time. Defaults to +56 days
--h => Display this help
--s => Reservation start time. Defaults +4 sec
--t => Ticket ID where work is being tracked. Eg.: UKMET-1234 / SFDC 123456789
--l => Specify non default login node (in event default fails) Eg.: login03
+New
 
-Script 17 = 
+Nodes without tickets
 
+Nodes reporting NHC failures
 
+Nodes marked as communication closed
+
+Designed for Slack or Jira handover summaries.
+
+Example:
+./node_sweep_report.sh
+
+Script 6: pbs.sh — PBS Helper Functions
+
+PBS-related helper functions used by other scripts.
+
+Must remain separate from functions.sh.
+
+Script 7: ping_nodes.sh — Blade-Level Ping Check
+
+Pings all nodes on a blade and reports reachability.
+
+Requires $NODES_XNAME (populate via setup_env.sh).
+
+Examples:
+./ping_nodes.sh x1102c7s2b0n2
+./ping_nodes.sh $XNAME
+
+Script 8: run_sweeps.sh — Sweep Orchestrator
+
+Single-entry launcher for routine health checks.
+
+Runs in order:
+
+sweepPBSNodes.sh
+
+node_sweep_report.sh
+
+sweepCray.sh
+
+Each script is checked for executability and run with labelled output and timestamps.
+
+Examples:
+./run_sweeps.sh
+./run_sweeps.sh --no-color
+
+Script 9: setup_env.sh — Environment Setup
+
+This script must be sourced.
+
+Example:
+source setup_env.sh
+
+Prompts for:
+
+Ticket ID
+
+NID
+
+Resolves and exports:
+
+XNAME
+
+SLOT
+
+BMC
+
+CHASSIS
+
+Node lists
+
+Optional features include readonly variable locking and a custom shell prompt.
+
+Script 10: status_check.sh — PBS and SAT Status Check
+
+Checks PBS node status and SAT system state for all nodes in a slot.
+
+Requires:
+
+SYSTEM_NAME
+
+NODES_XNAME
+
+SLOT
+
+Example:
+./status_check.sh x9000c3s0
+
+Script 11: sweepPBSNodes.sh — PBS Filtering Engine
+
+Core PBS sweep logic with strict filtering rules.
+
+Key behaviour:
+
+Drops healthy nodes (free, busy, job-exclusive)
+
+Special handling for nidd and legacy nide nodes
+
+Prints state summary and formatted table
+
+Prints “Clean!” if no nodes remain after filtering
+
+Example:
+SYSTEM_NAME=exa ./sweepPBSNodes.sh
+
+Script 12: cmm-key — CMM Key Helper
+
+Utility function used internally for CMM access.
+
+Script 13: serialNumber.sh — Hardware Inventory
+
+Collects serial numbers and health information via Redfish.
+
+Supports CPUs, DIMMs, NodeCards, NMCs, and PSUs.
+
+Example:
+./serialNumber.sh x1102c7s2b0n0
+
+Script 14: hwtriage — HPE Hardware Triage Tool
+
+External HPE-provided diagnostic tool.
+
+Used for structured hardware checks and log collection.
+
+Example:
+/opt/clmgr/hardware-triage-tool/hwtriage -h
+
+Script 15: hwtriage caller
+
+Wrapper script used to invoke hwtriage consistently.
+
+Script 16: prepareSlot.sh — Slot Safety and Reservation
+
+Safety-first script used before hardware intervention.
+
+Supports actions including:
+syscheck, down, reserveNode, reserveSlot, unreserve, clean, up
+
+Example:
+./prepareSlot.sh -a reserveSlot -x x9000c1s1b0n0 -t UKMET-1234
