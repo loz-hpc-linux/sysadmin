@@ -122,4 +122,48 @@ exa-ncn-m001:/scratch/laurence # ./ping_nodes.sh -h
 🧪 Recommended:
     Run 'setup_env.sh' before this script to populate environment vars.
 
-Script 8 = 
+Script 8 = RUN SWEEPS
+
+exa-ncn-m001:/scratch/laurence # ./run_sweeps.sh -h
+Usage:
+  run_sweeps.sh [OPTIONS]
+
+Description:
+  Orchestrates multiple sweep and reporting scripts, running each in sequence
+  and clearly labeling their output with timestamps and status.
+
+  Designed as a single-entry triage launcher for daily or ad-hoc health checks.
+
+Options:
+  -h, --help    Show this help menu and exit
+  --no-color    Disable colored output (useful for logs or CI capture)
+
+Executed Scripts (in order):
+  1. sweepPBSNodes.sh
+     - Collects PBS node state and failure summaries
+  2. node_sweep_report.sh
+     - Post-processes sweep results into classified output
+  3. sweepCray.sh
+     - Performs Cray-level health and reachability checks
+
+Behavior:
+  - Each script is checked for executability before running
+  - Output is wrapped with a timestamped header
+  - Exit codes are captured and reported per script
+  - Execution continues even if one script fails
+
+Requirements:
+  - Bash
+  - Executable permissions on all referenced scripts
+  - Sufficient privileges to query PBS and Cray management services
+
+Examples:
+  ./run_sweeps.sh
+  ./run_sweeps.sh --no-color
+  ./run_sweeps.sh --help
+
+Notes:
+  - This script does not modify system state
+  - Intended for human-readable triage, not machine parsing
+
+Script 9 = SETUP ENVIRONMENT
