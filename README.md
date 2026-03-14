@@ -80,17 +80,11 @@ Typical use cases include daily node health sweeps, incident triage, identifying
 ---
 
 ### pbs.sh
-Fetches PBS node information in JSON format and formats key attributes such as:
-
-• node hostname  
-• xname  
-• switch location  
-• core type  
-• work type  
-• node state  
-• associated jobs  
-
-Useful for inspecting scheduler state across a node set.
+Queries the PBS scheduler to retrieve and display detailed node state and metadata for one or more nodes in the cluster. 
+The function connects to the appropriate login node for the target system, executes pbsnodes in JSON mode, and parses the output using jq and awk to produce a clean, tabular summary.
+The output includes key infrastructure attributes such as Cray host ID, hostname, xname, switch location, CPU architecture, workload type, node state, scheduler comment, and active jobs. 
+If no nodes are specified, the function returns the state of all nodes visible to the scheduler; otherwise it restricts the query to the provided node set.
+Typical use cases include inspecting scheduler state during node triage, verifying resource attributes, identifying nodes that are offline or drained, and quickly correlating scheduler metadata with infrastructure issues across large HPC clusters.
 
 ---
 
