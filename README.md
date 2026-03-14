@@ -98,14 +98,12 @@ Typical use cases include monitoring node availability during blade bring-up, ve
 ---
 
 ### setup_env.sh
-Initialises a debugging environment for node triage sessions.
-
-Handles:
-
-• ticket identifiers  
-• node ID resolution  
-• environment variables  
-• shell prompt context  
+Initialises a structured troubleshooting environment for investigating node issues within an HPC cluster. 
+The script prompts the operator for a ticket identifier and node NID, then resolves related infrastructure information such as the node xname, BMC address, slot, chassis, and associated nodes within the same blade.
+When sourced into the current shell session, the script exports a set of environment variables that standardise the investigation context and make it easier for other diagnostic scripts to operate without repeatedly resolving infrastructure metadata. 
+It also loads shared utility functions, updates the $PATH to include common operational tooling, and optionally applies a custom command prompt to visually indicate an active triage session.
+Additional safeguards allow the user to lock the environment variables as readonly to prevent accidental modification during troubleshooting.
+Typical use cases include incident response, node triage sessions, infrastructure debugging workflows, and preparing a consistent shell environment for running cluster diagnostic scripts.
 
 ---
 
