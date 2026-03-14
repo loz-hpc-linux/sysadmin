@@ -1,243 +1,148 @@
-HPC Node Triage & Sweep Toolkit
+# HPC Node Diagnostics Toolkit
 
-A practical collection of Bash utilities for HPE Cray EX systems used to triage node failures, scan logs, validate hardware state, and summarise PBS/SAT health during incident response.
+A collection of Bash utilities designed to assist with diagnosing and triaging node issues in large-scale Linux HPC clusters.
 
-This repository is written for operators doing real incident work, not for demonstrations or automation theatre.
+The toolkit focuses on rapid infrastructure investigation by automating common operational tasks such as log analysis, node classification, scheduler state inspection, and hardware information gathering.
 
-Prerequisites
+These scripts were originally developed to streamline troubleshooting workflows across distributed HPC environments.
 
-Bash
+---
 
-SSH access to login nodes, compute nodes, and BMCs
+## Features
 
-/etc/cray/nidX present
+• Remote CPU and hardware identification  
+• Node connectivity and availability checks  
+• Automated log scanning across nodes and BMC interfaces  
+• PBS scheduler node state parsing and reporting  
+• Node sweep classification to assist incident triage  
+• Environment setup for structured debugging sessions  
 
-cluset, jq, awk, sort
+---
 
-PBS visibility from login nodes
+## Scripts
 
-Appropriate privileges for Redfish and Cray tooling
+### cpu_type.sh
+Queries CPU information on a remote node using SSH and extracts key processor details such as model name, family, and model number.
 
-Most scripts are expected to be run from an NCN or equivalent admin node.
+Useful for verifying hardware configuration across compute nodes.
 
+---
 
-Recommended Workflow
+### functions.sh
+Shared utility functions used across scripts.
 
-Source the environment
+Includes validation helpers for HPC node naming conventions such as Cray xnames and slot identifiers.
+
+---
+
+### log_scan.sh
+Performs a predefined set of log searches on compute nodes via SSH.
+
+Scans:
+var/log/messages /var/log/n*/current
+
+Useful for identifying common node issues quickly during triage.
+
+---
+
+### log_search.sh
+Searches BMC logs for a pattern and returns contextual lines around the most recent match.
+
+Designed to work with minimal shell environments such as BusyBox.
+
+---
+
+### node_sweep_report.sh
+Parses PBS node sweep output and classifies nodes into actionable categories.
+
+Example classifications:
+
+• Nodes already linked to active incident tickets  
+• Newly detected faults requiring investigation  
+• Nodes with closed communication or NHC issues  
+
+Useful for generating quick triage reports for operational handovers.
+
+---
+
+### pbs.sh
+Fetches PBS node information in JSON format and formats key attributes such as:
+
+• node hostname  
+• xname  
+• switch location  
+• core type  
+• work type  
+• node state  
+• associated jobs  
+
+Useful for inspecting scheduler state across a node set.
+
+---
+
+### ping_nodes.sh
+Checks connectivity across nodes within a blade or slot.
+
+Reports reachability and assists in identifying partially failing hardware groups.
+
+---
+
+### setup_env.sh
+Initialises a debugging environment for node triage sessions.
+
+Handles:
+
+• ticket identifiers  
+• node ID resolution  
+• environment variables  
+• shell prompt context  
+
+---
+
+### status_check.sh
+Checks both PBS node status and system health state for nodes within a specified slot.
+
+Provides a quick operational snapshot for infrastructure engineers.
+
+---
+
+## Requirements
+
+• Linux environment  
+• SSH access to compute nodes  
+• jq (for PBS JSON parsing)  
+• Access to cluster management utilities where applicable
+
+---
+
+## Example Workflow
+
+Typical investigation flow:
+
+1. Initialise ENVIRONMENT (Variables, paths, command prompt) 
+
 source setup_env.sh
 
-Run system-wide sweeps
-./run_sweeps.sh
+2. Inspect node status (PBS & SAT) 
 
-Investigate a specific slot
-./log_scan.sh x1102c7s2
-
-Perform a targeted log search if required
-./log_search.sh -p "PowerError|SensorReadError"
-
-Validate PBS and SAT status
 ./status_check.sh x1102c7s2
 
+3. Scan logs (latest keyword results) 
 
+./log_scan.sh x1102c7s2
 
-SCRIPT REFERENCE
+4. Search BMC logs (specific string search to capture period of interest) 
 
-Script 1: cpu_type.sh — CPU Identification
+./log_search.sh -p "error" -A 50 -B 50
 
-  Identifies CPU model, family, and inferred generation.
-  
-  Example:
-  ./cpu_type.sh x1003c1s7b0n0
-  
-  Outputs CPU model details and architecture (e.g. Milan).
+---
 
-Script 2: functions.sh — Shared Functions
+## Purpose
 
-  Core helper functions required by most scripts in this repository.
-  
-  This file must remain separate and must not be inlined or removed.
+These tools were created to improve the efficiency of diagnosing infrastructure issues in distributed Linux HPC environments by reducing repetitive manual investigation tasks.
 
-Script 3: log_scan.sh — Automated Slot Log Scan
+---
 
-  Runs standard greps across both sides of a slot (b0 and b1).
-  
-  Scans:
-  
-  /var/log/n*/current
-  
-  /var/log/messages
-  
-  Searches for common failure indicators including:
-  failed, error, power, PCIe, MCE, MCA, squashfs, hsn
-  
-  Example:
-  ./log_scan.sh x1102c7s2
+## License
 
-Script 4: log_search.sh — Pattern-Based Log Search (BMC)
-
-  Finds the last occurrence of a pattern and prints surrounding context.
-  
-  Features:
-  
-  Case-insensitive extended regex
-  
-  Configurable context lines before and after
-  
-  Searches both messages and n*/current logs on the BMC
-  
-  Requires $BMC to be set (use setup_env.sh).
-  
-  Examples:
-  ./log_search.sh
-  ./log_search.sh -p "VDDCR_CPUB|VDD_1V1_S3"
-  ./log_search.sh -B 50 -A 50 -p "SensorReadError|PowerError"
-
-Script 5: node_sweep_report.sh — PBS Node Classification
-
-  Runs sweepPBSNodes.sh and classifies nodes into:
-  
-  Existing
-  
-  Nodes already linked to UKMET-* tickets
-  
-  New
-  
-  Nodes without tickets
-  
-  Nodes reporting NHC failures
-  
-  Nodes marked as communication closed
-  
-  Designed for Slack or Jira handover summaries.
-  
-  Example:
-  ./node_sweep_report.sh
-
-Script 6: pbs.sh — PBS Helper Functions
-
-  PBS-related helper functions used by other scripts.
-  
-  Must remain separate from functions.sh.
-
-Script 7: ping_nodes.sh — Blade-Level Ping Check
-
-  Pings all nodes on a blade and reports reachability.
-  
-  Requires $NODES_XNAME (populate via setup_env.sh).
-  
-  Examples:
-  ./ping_nodes.sh x1102c7s2b0n2
-  ./ping_nodes.sh $XNAME
-
-Script 8: run_sweeps.sh — Sweep Orchestrator
-
-  Single-entry launcher for routine health checks.
-  
-  Runs in order:
-  
-  sweepPBSNodes.sh
-  
-  node_sweep_report.sh
-  
-  sweepCray.sh
-  
-  Each script is checked for executability and run with labelled output and timestamps.
-  
-  Examples:
-  ./run_sweeps.sh
-  ./run_sweeps.sh --no-color
-
-Script 9: setup_env.sh — Environment Setup
-
-  This script must be sourced.
-  
-  Example:
-  source setup_env.sh
-  
-  Prompts for:
-  
-  Ticket ID
-  
-  NID
-  
-  Resolves and exports:
-  
-  XNAME
-  
-  SLOT
-  
-  BMC
-  
-  CHASSIS
-  
-  Node lists
-  
-  Optional features include readonly variable locking and a custom shell prompt.
-
-Script 10: status_check.sh — PBS and SAT Status Check
-
-  Checks PBS node status and SAT system state for all nodes in a slot.
-  
-  Requires:
-  
-  SYSTEM_NAME
-  
-  NODES_XNAME
-  
-  SLOT
-  
-  Example:
-  ./status_check.sh x9000c3s0
-
-Script 11: sweepPBSNodes.sh — PBS Filtering Engine
-
-  Core PBS sweep logic with strict filtering rules.
-  
-  Key behaviour:
-  
-  Drops healthy nodes (free, busy, job-exclusive)
-  
-  Special handling for nidd and legacy nide nodes
-  
-  Prints state summary and formatted table
-  
-  Prints “Clean!” if no nodes remain after filtering
-  
-  Example:
-  SYSTEM_NAME=exa ./sweepPBSNodes.sh
-
-Script 12: cmm-key — CMM Key Helper
-
-  Utility function used internally for CMM access.
-
-Script 13: serialNumber.sh — Hardware Inventory
-
-  Collects serial numbers and health information via Redfish.
-  
-  Supports CPUs, DIMMs, NodeCards, NMCs, and PSUs.
-  
-  Example:
-  ./serialNumber.sh x1102c7s2b0n0
-
-Script 14: hwtriage — HPE Hardware Triage Tool
-
-  External HPE-provided diagnostic tool.
-  
-  Used for structured hardware checks and log collection.
-  
-  Example:
-  /opt/clmgr/hardware-triage-tool/hwtriage -h
-
-Script 15: hwtriage caller
-
-  Wrapper script used to invoke hwtriage consistently.
-
-Script 16: prepareSlot.sh — Slot Safety and Reservation
-
-  Safety-first script used before hardware intervention.
-  
-  Supports actions including:
-  syscheck, down, reserveNode, reserveSlot, unreserve, clean, up
-  
-  Example:
-  ./prepareSlot.sh -a reserveSlot -x x9000c1s1b0n0 -t UKMET-1234
+MIT
