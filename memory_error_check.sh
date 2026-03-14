@@ -10,12 +10,12 @@ Usage:
   memory_error_check.sh [options] <XNAME|comma-separated-xnames|space-separated-xnames>
 
 Description:
-  Query ras-mc-ctl memory ECC counters on one or more compute nodes and display:
+  Query ras-mc-ctl memory ECC counters on one or more target nodes and display:
     - Memory channel label
     - Correctable errors (CE)
     - Uncorrectable errors (UE)
     - Per-node totals
-    - Current NHC rule status
+    - Current health rule status
 
 Supported input forms:
   memory_error_check.sh x1011c1s6b0n1
@@ -31,9 +31,9 @@ Options:
 Notes:
   - Requires SSH access to each target node
   - Requires ras-mc-ctl on the target node
-  - Current NHC logic in your environment is:
-      UE total > 0      -> NHC fail / offline
-      CE total > 10000  -> NHC fail / offline
+  - Current health rule logic in this example is:
+      UE total > 0      -> health check fail / offline
+      CE total > 10000  -> health check fail / offline
 EOF
 }
 
@@ -102,7 +102,7 @@ run_node_check() {
 
       printf "\n%-28s %10d %10d\n", "TOTAL", total_ce, total_ue
 
-      printf "\nNHC status:\n"
+      printf "\nHealth rule status:\n"
       if (total_ue > 0) {
         printf "  - UE rule: FAIL  (UE total %d > 0)\n", total_ue
       } else {
