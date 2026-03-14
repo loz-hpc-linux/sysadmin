@@ -175,14 +175,21 @@ The workflow below illustrates a typical diagnostic path.
 
 ---
 
-### 1. Initialise Investigation Environment
+## Example Workflow
+
+The toolkit supports a **structured investigation workflow** commonly used during HPC node triage and incident response.
+
+Rather than running scripts independently, operators typically follow a sequence of investigation stages.
+
+---
+
+### Initialise Investigation Environment
 
 Before beginning diagnostics, initialise the investigation environment.
 
-```bash
 source setup_env.sh
 
-This step resolves infrastructure metadata and prepares the shell session with consistent variables used by other scripts.
+This resolves infrastructure metadata and prepares the shell session with consistent variables used by other scripts.
 
 The script automatically determines:
 
@@ -196,9 +203,9 @@ sibling nodes on the same blade
 
 These variables allow other scripts to operate without repeatedly resolving infrastructure relationships.
 
-2. Inspect Scheduler and Platform State
+Inspect Scheduler and Platform State
 
-Check whether the node appears healthy from both the scheduler and system management perspective.
+Check whether the node appears healthy from the perspective of both the scheduler and the system management layer.
 
 ./status_checker.sh
 
@@ -218,9 +225,9 @@ nodes failing to boot
 
 discrepancies between scheduler and platform views
 
-3. Perform Slot-Level Log Triage
+Perform Slot-Level Log Triage
 
-If infrastructure issues are suspected, scan logs from both BMC sides of the slot.
+If infrastructure issues are suspected, logs from both BMC sides of the slot are scanned.
 
 ./log_scan.sh
 
@@ -243,15 +250,15 @@ squashfs filesystem errors
 
 machine check exceptions (MCE / MCA)
 
-This step provides a quick overview of potential failure signals across all nodes in the slot.
+This step provides a quick overview of potential failure signals across nodes in the slot.
 
-4. Investigate Specific Log Events
+Investigate Specific Log Events
 
-Once a potential failure indicator is identified, deeper investigation can be performed using targeted log searches.
+Once a potential failure indicator has been identified, deeper investigation can be performed using targeted log searches.
 
 ./log_search.sh -p "error" -A 50 -B 50
 
-This retrieves the most recent matching log entry and surrounding context, helping operators understand the sequence of events leading to a failure.
+This retrieves the most recent matching log entry and surrounding context, helping operators understand the sequence of events leading to the failure.
 
 Typical investigations include:
 
@@ -263,23 +270,23 @@ hardware telemetry errors
 
 node boot failures
 
-5. Verify Hardware Characteristics
+Verify Hardware Characteristics
 
 Hardware configuration can be validated during troubleshooting.
 
 ./cpu_type.sh <node>
 
-This identifies the CPU generation and processor details of the compute node, which is useful when diagnosing heterogeneous cluster environments.
+This identifies the CPU generation and processor details of the compute node, which can be useful when diagnosing heterogeneous cluster environments.
 
-6. Check Memory Health
+Check Memory Health
 
 Memory reliability can be assessed by querying ECC error counters.
 
 ./memory_error_check.sh <node>
 
-The script retrieves per-channel error counts and evaluates the results against cluster health thresholds used by Node Health Check (NHC) policies.
+The script retrieves per-channel error counts and evaluates results against cluster health thresholds used by Node Health Check (NHC) policies.
 
-7. Investigate Fabric Connectivity
+Investigate Fabric Connectivity
 
 If network instability is suspected, investigate Slingshot fabric ports associated with the node.
 
@@ -287,15 +294,15 @@ If network instability is suspected, investigate Slingshot fabric ports associat
 
 The script maps compute nodes to their switch ports and retrieves link flap information from fabric management services.
 
-This is useful when diagnosing:
+This is particularly useful when diagnosing:
 
 HSN link instability
 
-intermittent connectivity
+intermittent connectivity issues
 
 network congestion symptoms
 
-8. Monitor Node Recovery
+Monitor Node Recovery
 
 When nodes are rebooting or returning from maintenance, their availability can be monitored.
 
@@ -303,7 +310,7 @@ When nodes are rebooting or returning from maintenance, their availability can b
 
 The script continuously checks connectivity for all nodes within a blade and reports when they become reachable.
 
-9. Run Cluster Sweeps
+Run Cluster Sweeps
 
 For broader cluster health monitoring, cluster sweep utilities can be executed.
 
