@@ -121,7 +121,7 @@ This stage provides a quick overview of potential failure signals across all nod
 
 Once a potential failure indicator is identified, deeper investigation can be performed using targeted log searches.
 
-./log_search.sh -p "error" -A 50 -B 50
+./log_search.sh -p "lmon link down" -A 50 -B 50
 
 This retrieves the most recent matching log entry and surrounding context, helping operators understand the sequence of events that led to the failure.
 
