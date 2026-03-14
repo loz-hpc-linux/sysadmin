@@ -83,6 +83,8 @@ The script also evaluates the results against the current Node Health Check (NHC
 By default, only channels with non-zero error counts are displayed, though an option is available to show all memory channels including those with zero errors.
 Typical use cases include hardware health diagnostics, investigating node instability, identifying failing DIMMs or memory channels, and verifying whether memory error rates exceed operational thresholds that would trigger node offlining within the cluster scheduler.
 
+---
+
 ### node_sweep_report.sh
 Automates first-pass triage of compute nodes by running a cluster sweep and classifying nodes based on existing incident or ticket status. 
 The script executes sweepPBSNodes.sh, parses the resulting node summary, and separates nodes into existing issues and new faults requiring investigation.
@@ -109,6 +111,18 @@ The script determines the blade layout using the $NODES_XNAME environment variab
 Once the node list is derived from the provided xname, the script continuously checks each node using ICMP ping and prints a live status summary indicating whether nodes are responding. 
 The loop continues until all nodes on the blade become reachable, making it useful for tracking node recovery during power operations, boot sequences, or maintenance work.
 Typical use cases include monitoring node availability during blade bring-up, verifying cluster recovery after maintenance, and confirming that all nodes within a slot have returned to network reachability.
+
+---
+
+### run_sweeps.sh
+Orchestrates a sequence of cluster health checks by executing multiple diagnostic scripts and presenting their output in a structured format. The script acts as a wrapper around several operational tools, running them in order and clearly labelling the output from each stage.
+For each task, the script verifies that the target script exists and is executable before running it. Execution results are reported with colour-coded status messages indicating success or failure, making it easier to review results during operational checks or incident triage sessions.
+The workflow currently includes:
+PBS node sweep to inspect scheduler-visible node health
+Node sweep reporting to summarise findings from previous checks
+Cray system sweep to examine infrastructure-level node state
+This wrapper provides a convenient way to run multiple diagnostics together while maintaining clear separation of their outputs.
+Typical use cases include daily cluster health checks, operational monitoring during support rotations, and quickly gathering system status information during incident investigations.
 
 ---
 
