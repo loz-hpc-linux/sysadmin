@@ -2,6 +2,8 @@
 
 #set -euo pipefail
 
+readonly NODE_MAP_FILE="${NODE_MAP_FILE:-/etc/hpc/node-map}"
+
 ########## Help / Usage ##########
 
 usage() {
@@ -14,7 +16,7 @@ Description:
   on both sides of a slot (<SLOT>b0 and <SLOT>b1) via SSH.
 
 Arguments:
-  SLOT          Slot identifier that resolves via /etc/cray/nidX
+  SLOT          Slot identifier that resolves via the node mapping file
                 Example: x1102c7s2  (script will SSH to x1102c7s2b0 and x1102c7s2b1)
 
 Options:
@@ -22,7 +24,7 @@ Options:
 
 Notes:
   - Requires SSH access to ${SLOT}b0 and ${SLOT}b1.
-  - Uses /etc/cray/nidX for xname<->nid lookups.
+  - Uses /etc/hpc/node-map for xname<->nid lookups.
   - cluset must be available for the NODES_* expansions.
 
 Examples:
@@ -46,11 +48,11 @@ SLOT="$1"
 ########## Functions ##########
 
 x2n() {
-  grep "$1" /etc/cray/nidX | awk '{print $2}'
+  grep "$1" "${NODE_MAP_FILE}" | awk '{print $2}'
 }
 
 n2x() {
-  grep "$1" /etc/cray/nidX | awk '{print $1}'
+  grep "$1" "${NODE_MAP_FILE}" | awk '{print $1}'
 }
 
 run_search() {
@@ -109,4 +111,3 @@ for side in b0 b1; do
   run_search "TYPE On in /var/log/messages on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'type On' /var/log/messages | tail -n 20\""
   run_search "PCIe in /var/log/messages on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'PCIe' /var/log/messages | tail -n 20\""
 done
-
