@@ -22,9 +22,11 @@ These scripts were originally developed to streamline troubleshooting workflows 
 ## Scripts
 
 ### cpu_type.sh
-Queries CPU information on a remote node using SSH and extracts key processor details such as model name, family, and model number.
-
-Useful for verifying hardware configuration across compute nodes.
+Queries a remote compute node to identify the installed CPU architecture and processor details. 
+The script connects to the specified node via SSH, runs lscpu, and extracts key information including model name, CPU family, and model number.
+Using these values, the script performs simple architecture detection logic to determine whether the node is running AMD EPYC Milan or Genoa processors, which are common CPU generations in modern HPC platforms. 
+The output provides a quick hardware verification check that can be useful when investigating node behaviour, validating hardware configuration, or confirming CPU generation during diagnostics.
+Typical use cases include hardware verification, architecture-aware troubleshooting, and confirming node CPU types when investigating scheduler allocations or platform behaviour across heterogeneous HPC clusters.
 
 ---
 
