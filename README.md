@@ -36,12 +36,10 @@ Includes validation helpers for HPC node naming conventions such as Cray xnames 
 ---
 
 ### log_scan.sh
-Performs a predefined set of log searches on compute nodes via SSH.
-
-Scans:
-var/log/messages /var/log/n*/current
-
-Useful for identifying common node issues quickly during triage.
+Runs a standard set of targeted log searches across both BMC sides of a slot (<SLOT>b0 and <SLOT>b1) over SSH to speed up first-pass HPC triage. 
+The script resolves related xname/NID information from /etc/cray/nidX, prints useful slot context (xnames, BMC, chassis), and scans both /var/log/n*/current and /var/log/messages for common failure indicators, 
+such as failed, error, fault, power, HSN, PCIe, MCA, MCE, squashfs, and node power state markers (type Off / type On). 
+Results are grouped by log type and slot side, with recent matches shown via tail, making it useful for quickly spotting hardware, boot, fabric, filesystem, and power-related issues across an entire slot.
 
 ---
 
