@@ -44,9 +44,14 @@ Results are grouped by log type and slot side, with recent matches shown via tai
 ---
 
 ### log_search.sh
-Searches BMC logs for a pattern and returns contextual lines around the most recent match.
+Searches remote Cray BMC logs for a user-defined pattern and returns contextual output around the most recent match. 
+The script connects to the target BMC via SSH, scans /var/log/messages and /var/log/n*/current, and identifies the last occurrence of the search pattern across all logs. 
+It then prints configurable lines of context before and after the match, helping operators quickly understand the surrounding events during hardware or node fault investigation.
 
-Designed to work with minimal shell environments such as BusyBox.
+The script supports extended regular expressions, prompts for a pattern if one is not supplied, and encodes the search pattern to safely execute against minimal remote shells 
+(including BusyBox environments commonly found on BMC systems). It also performs environment checks to ensure the correct BMC target is set and automatically handles file discovery across node log paths.
+
+Typical use cases include diagnosing power faults, sensor errors, node crashes, hardware telemetry events, and boot failures by quickly locating the most recent relevant log entry and its surrounding context.
 
 ---
 
