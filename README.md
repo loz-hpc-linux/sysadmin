@@ -69,13 +69,19 @@ Results are grouped by log type and slot side, with recent matches shown via tai
 Searches remote Cray BMC logs for a user-defined pattern and returns contextual output around the most recent match. 
 The script connects to the target BMC via SSH, scans /var/log/messages and /var/log/n*/current, and identifies the last occurrence of the search pattern across all logs. 
 It then prints configurable lines of context before and after the match, helping operators quickly understand the surrounding events during hardware or node fault investigation.
-
 The script supports extended regular expressions, prompts for a pattern if one is not supplied, and encodes the search pattern to safely execute against minimal remote shells 
 (including BusyBox environments commonly found on BMC systems). It also performs environment checks to ensure the correct BMC target is set and automatically handles file discovery across node log paths.
-
 Typical use cases include diagnosing power faults, sensor errors, node crashes, hardware telemetry events, and boot failures by quickly locating the most recent relevant log entry and its surrounding context.
 
 ---
+
+### memory_error_check.sh
+Queries compute nodes for memory ECC error statistics using ras-mc-ctl and reports per-channel and per-node error counts. 
+The script connects to one or more nodes via SSH, retrieves hardware error counters, and summarises correctable errors (CE) and uncorrectable errors (UE) across all memory channels.
+Results are displayed in a structured table showing individual memory channel statistics alongside total CE and UE counts for the node.
+The script also evaluates the results against the current Node Health Check (NHC) policy used in the environment, indicating whether the node would pass or fail health checks based on configured thresholds.
+By default, only channels with non-zero error counts are displayed, though an option is available to show all memory channels including those with zero errors.
+Typical use cases include hardware health diagnostics, investigating node instability, identifying failing DIMMs or memory channels, and verifying whether memory error rates exceed operational thresholds that would trigger node offlining within the cluster scheduler.
 
 ### node_sweep_report.sh
 Automates first-pass triage of compute nodes by running a cluster sweep and classifying nodes based on existing incident or ticket status. 
