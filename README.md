@@ -12,6 +12,8 @@ The toolkit focuses on rapid infrastructure investigation by automating common o
 
 These tools were developed to streamline troubleshooting workflows across distributed HPC environments where manual investigation can involve multiple infrastructure layers including compute nodes, BMCs, schedulers, and fabric management systems.
 
+Developed while operating large-scale HPE Cray EX clusters containing thousands of compute nodes.
+
 The scripts are designed to be lightweight, composable, and easily executed from standard Linux environments used to operate HPC clusters.
 
 ---
