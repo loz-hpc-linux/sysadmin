@@ -48,6 +48,15 @@ Typical use cases include node triage, hardware fault investigation, scheduler s
 
 ---
 
+### link_flap_check.sh
+Queries Slingshot fabric management data to identify the network switch ports associated with one or more compute node xnames, then retrieves link flap information for those ports. 
+The script looks up conn_port values in fabric_template.json via the Slingshot Fabric Manager (FMN) and runs diagnostic commands such as show-flaps for each discovered port.
+It accepts single xnames as well as comma-separated or space-separated node lists, automatically removes duplicate entries, and resolves the relevant port mappings without leaving files behind after execution. 
+The script prefers an existing fmnpod helper where available, but can also fall back to kubectl exec into a running slingshot-fabric-manager pod if direct FMN access is not present.
+Typical use cases include investigating HSN link instability, checking for fabric flap history on ports serving specific compute nodes, and correlating node-level network issues with switch-port behaviour in Slingshot-based HPC environments.
+
+---
+
 ### log_scan.sh
 Runs a standard set of targeted log searches across both BMC sides of a slot (<SLOT>b0 and <SLOT>b1) over SSH to speed up first-pass HPC triage. 
 The script resolves related xname/NID information from /etc/cray/nidX, prints useful slot context (xnames, BMC, chassis), and scans both /var/log/n*/current and /var/log/messages for common failure indicators, 
