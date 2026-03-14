@@ -67,15 +67,13 @@ Typical use cases include diagnosing power faults, sensor errors, node crashes, 
 ---
 
 ### node_sweep_report.sh
-Parses PBS node sweep output and classifies nodes into actionable categories.
-
-Example classifications:
-
-• Nodes already linked to active incident tickets  
-• Newly detected faults requiring investigation  
-• Nodes with closed communication or NHC issues  
-
-Useful for generating quick triage reports for operational handovers.
+Automates first-pass triage of compute nodes by running a cluster sweep and classifying nodes based on existing incident or ticket status. 
+The script executes sweepPBSNodes.sh, parses the resulting node summary, and separates nodes into existing issues and new faults requiring investigation.
+Nodes are classified by inspecting scheduler comments associated with each node:
+Existing — nodes already linked to incident tickets
+New — nodes without tickets or marked with NHC or communication closed states
+The script preserves the original Node Summary output from the sweep while producing a simplified classification that can be quickly shared in Slack, operational handovers, or Jira incident updates. Temporary files are created during processing and automatically cleaned up.
+Typical use cases include daily node health sweeps, incident triage, identifying newly failing nodes, and preparing operational summaries during HPC cluster support rotations.
 
 ---
 
