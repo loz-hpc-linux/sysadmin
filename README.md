@@ -18,14 +18,14 @@ The scripts are designed to be lightweight, composable, and easily executed from
 
 ## Features
 
-• Remote CPU and hardware identification
-• Node connectivity and availability monitoring
-• Automated log scanning across nodes and BMC interfaces
-• PBS scheduler state inspection and parsing
-• Cluster sweep classification for operational triage
-• Environment setup for structured debugging sessions
-• Fabric diagnostics for Slingshot link stability
-• Memory ECC health inspection via ras-mc-ctl
+- Remote CPU and hardware identification
+- Node connectivity and availability monitoring
+- Automated log scanning across nodes and BMC interfaces
+- PBS scheduler state inspection and parsing
+- Cluster sweep classification for operational triage
+- Environment setup for structured debugging sessions
+- Fabric diagnostics for Slingshot link stability
+- Memory ECC health inspection via ras-mc-ctl
 
 ---
 
