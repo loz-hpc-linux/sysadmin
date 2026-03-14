@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# log_search.sh — Search remote BMC logs and show context around the LAST match
-# Works with remote /bin/sh (BusyBox OK). No bash required on BMC.
+# log_search.sh — Search remote management-controller logs and show context around the LAST match
+# Works with remote /bin/sh (BusyBox OK). No bash required on the remote target.
 
 set -Eeuo pipefail
 
@@ -14,7 +14,7 @@ Usage:
 
 Description:
   - Prompts for a search pattern if -p is omitted (extended regex, case-insensitive).
-  - Searches BOTH on the remote BMC:
+  - Searches BOTH on the remote management host:
       /var/log/messages
       /var/log/n*/current
   - Finds the LAST match across those files and prints <before>/<after> lines of context.
@@ -26,8 +26,8 @@ Options:
   -p "<pattern>"  ERE pattern (quote it if it includes | or spaces)
 
 Environment detection:
-  Requires $BMC to be set. If it's not set, run:
-    source /opt/cray/hpe-admin/site-team/scripts/lharding/setup_env.sh
+  Requires $MGMT_HOST to be set. If it's not set, run:
+    source /opt/hpc-tools/env/setup_env.sh
 
 Examples:
   ./log_search.sh
@@ -53,10 +53,10 @@ while getopts ":hB:A:p:" opt; do
 done
 
 # --- Environment check ---
-if [[ -z "${BMC:-}" ]]; then
-  echo "ERROR: \$BMC is not set."
+if [[ -z "${MGMT_HOST:-}" ]]; then
+  echo "ERROR: \$MGMT_HOST is not set."
   echo "Please run:"
-  echo "  source /opt/cray/hpe-admin/site-team/scripts/lharding/setup_env.sh"
+  echo "  source /opt/hpc-tools/env/setup_env.sh"
   exit 1
 fi
 
@@ -80,7 +80,7 @@ else
 fi
 
 # --- Remote execution: stream script over stdin; pass args positionally (no -c) ---
-ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new "$BMC" /bin/sh -s -- "$PAT_B64" "$BEFORE" "$AFTER" <<'REMOTE'
+ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new "$MGMT_HOST" /bin/sh -s -- "$PAT_B64" "$BEFORE" "$AFTER" <<'REMOTE'
 set -eu
 
 PAT_B64="${1:-}"
@@ -122,7 +122,7 @@ START=$(( HIT_LINE - BEFORE )); [ "$START" -lt 1 ] && START=1
 END=$(( HIT_LINE + AFTER ))
 
 echo
-echo "=== BMC: $(hostname) ==="
+echo "=== MGMT HOST: $(hostname) ==="
 echo
 echo "Pattern     : $PATTERN"
 echo "File        : $HIT_FILE"
