@@ -3,6 +3,8 @@
 readonly BOLD=$(tput bold)
 readonly RESET=$(tput sgr0)
 
+readonly NODE_MAP_FILE="${NODE_MAP_FILE:-/etc/hpc/node-map}"
+
 checkNodeBMCXname() {
     local xname="${1}"
     readonly xname
@@ -103,16 +105,16 @@ loginNode() {
     fi
 
     # List of fallback login nodes
-    local login_candidates=("login01" "login02" "login03" "login04" "login05")
+    local login_candidates=("login-a1" "login-a2" "login-b1" "login-b2" "login-c1")
 
     # Prioritize based on system name
-    if [[ "${systemName}" == "exx" || "${systemName}" == "exy" ]]; then
-        login_candidates=("login03" "login04" "login02" "login01" "login05")
-    elif [[ "${systemName}" == "exa" || "${systemName}" == "exb" || "${systemName}" == "exc" || "${systemName}" == "exd" ]]; then
-        login_candidates=("login05" "login04" "login03" "login02" "login01")
-    elif [[ "${systemName}" == "exz" ]]; then
-        __CACHED_LOGIN_NODE="uan01"
-        echo "uan01"
+    if [[ "${systemName}" == "cluster-b" ]]; then
+        login_candidates=("login-b1" "login-b2" "login-a2" "login-a1" "login-c1")
+    elif [[ "${systemName}" == "cluster-a" ]]; then
+        login_candidates=("login-c1" "login-b2" "login-b1" "login-a2" "login-a1")
+    elif [[ "${systemName}" == "cluster-c" ]]; then
+        __CACHED_LOGIN_NODE="access-gw1"
+        echo "access-gw1"
         return 0
     fi
 
@@ -130,12 +132,11 @@ loginNode() {
     return 1
 }
 
-
 pbsUser() {
     local systemName="${1}"
     readonly systemName
     if [[ -n "${systemName}" ]]; then
-        echo "hpeadmin"
+        echo "clusteradmin"
     else
         echo "root"
     fi
@@ -146,7 +147,7 @@ ntox() {
     readonly nodes
     for n in $(nodeset -e ${nodes});
     do
-        grep $n /etc/cray/nidX | cut -f1 -d' ';
+        grep $n "${NODE_MAP_FILE}" | cut -f1 -d' ';
     done | nodeset -f
 }
 
@@ -294,7 +295,6 @@ xton() {
     readonly nodes
     for n in $(nodeset -e ${nodes});
     do
-        grep $n /etc/cray/nidX | cut -f2 -d' ';
+        grep $n "${NODE_MAP_FILE}" | cut -f2 -d' ';
     done | nodeset -f
 }
-
