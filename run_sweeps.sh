@@ -45,10 +45,8 @@ function run_and_label() {
 }
 
 # === RUN SCRIPTS ===
-run_and_label "Sweep PBS Nodes" "/opt/cray/hpe-admin/site-team/scripts/sweepPBSNodes.sh"
-run_and_label "Node Sweep Report" "/scratch/laurence/node_sweep_report.sh"
-run_and_label "Sweep Cray Nodes" "/opt/cray/hpe-admin/site-team/scripts/sweepCray.sh"
+run_and_label "Scheduler Sweep" "/opt/hpc-tools/bin/scheduler_sweep.sh"
+run_and_label "Node Sweep Report" "/var/tmp/hpc/node_sweep_report.sh"
+run_and_label "Cluster Sweep" "/opt/hpc-tools/bin/cluster_sweep.sh"
 
 echo -e "${BLUE}\nAll tasks completed. Review the above output for results.${NC}"
-
-
