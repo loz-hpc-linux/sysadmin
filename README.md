@@ -175,15 +175,17 @@ The workflow below illustrates a typical diagnostic path.
 
 ---
 
-## Example Workflow
+---
 
-The toolkit supports a **structured investigation workflow** commonly used during HPC node triage and incident response.
+## Operational Workflow
 
-Rather than running scripts independently, operators typically follow a sequence of investigation stages.
+The toolkit is designed to support a structured investigation workflow commonly used during HPC node triage and cluster incident response.
+
+Rather than running scripts independently, operators typically follow a sequence of investigation stages when diagnosing node issues in large-scale HPC environments.
 
 ---
 
-### Initialise Investigation Environment
+### 1. Initialise Investigation Environment
 
 Before beginning diagnostics, initialise the investigation environment.
 
@@ -193,92 +195,87 @@ This resolves infrastructure metadata and prepares the shell session with consis
 
 The script automatically determines:
 
-node xname
+- node xname
+- BMC address
+- slot and chassis location
+- sibling nodes on the same blade
 
-BMC address
+These environment variables allow subsequent scripts to operate without repeatedly resolving infrastructure relationships.
 
-slot and chassis location
+---
 
-sibling nodes on the same blade
+### 2. Inspect Scheduler and Platform State
 
-These variables allow other scripts to operate without repeatedly resolving infrastructure relationships.
-
-Inspect Scheduler and Platform State
-
-Check whether the node appears healthy from the perspective of both the scheduler and the system management layer.
+Check whether the node appears healthy from both the scheduler and system management perspective.
 
 ./status_checker.sh
 
 This correlates:
 
-PBS scheduler state
-
-SAT platform management state
+PBS scheduler state  
+SAT platform management state  
 
 Typical issues identified at this stage include:
 
-nodes marked offline or drained
+- nodes marked offline or drained
+- configuration mismatches
+- nodes failing to boot
+- discrepancies between scheduler and platform views
 
-configuration mismatches
+---
 
-nodes failing to boot
-
-discrepancies between scheduler and platform views
-
-Perform Slot-Level Log Triage
+### 3. Perform Slot-Level Log Triage
 
 If infrastructure issues are suspected, logs from both BMC sides of the slot are scanned.
 
 ./log_scan.sh
 
-The script performs keyword searches across:
+The script performs rapid keyword searches across:
 
-/var/log/messages
-/var/log/n*/current
+/var/log/messages  
+/var/log/n*/current  
 
 Common failure indicators include:
 
-hardware faults
+- hardware faults
+- power events
+- PCIe errors
+- HSN fabric issues
+- squashfs filesystem errors
+- machine check exceptions (MCE / MCA)
 
-power events
+This stage provides a quick overview of potential failure signals across all nodes in the slot.
 
-PCIe errors
+---
 
-HSN fabric issues
+### 4. Investigate Specific Log Events
 
-squashfs filesystem errors
-
-machine check exceptions (MCE / MCA)
-
-This step provides a quick overview of potential failure signals across nodes in the slot.
-
-Investigate Specific Log Events
-
-Once a potential failure indicator has been identified, deeper investigation can be performed using targeted log searches.
+Once a potential failure indicator is identified, deeper investigation can be performed using targeted log searches.
 
 ./log_search.sh -p "error" -A 50 -B 50
 
-This retrieves the most recent matching log entry and surrounding context, helping operators understand the sequence of events leading to the failure.
+This retrieves the most recent matching log entry and surrounding context, helping operators understand the sequence of events that led to the failure.
 
 Typical investigations include:
 
-power sequencing failures
+- power sequencing failures
+- sensor alerts
+- hardware telemetry errors
+- node boot failures
 
-sensor alerts
+---
 
-hardware telemetry errors
-
-node boot failures
-
-Verify Hardware Characteristics
+### 5. Verify Hardware Characteristics
 
 Hardware configuration can be validated during troubleshooting.
 
 ./cpu_type.sh <node>
 
-This identifies the CPU generation and processor details of the compute node, which can be useful when diagnosing heterogeneous cluster environments.
+This identifies the CPU generation and processor details of the compute node, which is useful when diagnosing heterogeneous cluster environments.
 
-Check Memory Health
+---
+
+### 6. Check Memory Health
 
 Memory reliability can be assessed by querying ECC error counters.
 
@@ -286,23 +283,25 @@ Memory reliability can be assessed by querying ECC error counters.
 
 The script retrieves per-channel error counts and evaluates results against cluster health thresholds used by Node Health Check (NHC) policies.
 
-Investigate Fabric Connectivity
+---
+
+### 7. Investigate Fabric Connectivity
 
 If network instability is suspected, investigate Slingshot fabric ports associated with the node.
 
 ./link_flap_check.sh <xname>
 
-The script maps compute nodes to their switch ports and retrieves link flap information from fabric management services.
+The script maps compute nodes to their corresponding switch ports and retrieves link flap information from fabric management services.
 
-This is particularly useful when diagnosing:
+Typical use cases include diagnosing:
 
-HSN link instability
+- HSN link instability
+- intermittent connectivity issues
+- network congestion symptoms
 
-intermittent connectivity issues
+---
 
-network congestion symptoms
-
-Monitor Node Recovery
+### 8. Monitor Node Recovery
 
 When nodes are rebooting or returning from maintenance, their availability can be monitored.
 
@@ -310,7 +309,9 @@ When nodes are rebooting or returning from maintenance, their availability can b
 
 The script continuously checks connectivity for all nodes within a blade and reports when they become reachable.
 
-Run Cluster Sweeps
+---
+
+### 9. Run Cluster Sweeps
 
 For broader cluster health monitoring, cluster sweep utilities can be executed.
 
@@ -318,13 +319,11 @@ For broader cluster health monitoring, cluster sweep utilities can be executed.
 
 This runs multiple operational checks including:
 
-PBS node sweeps
+- PBS node sweeps
+- node classification
+- system-level infrastructure checks
 
-node classification
-
-system-level infrastructure checks
-
-The output provides a consolidated overview of cluster state.
+The output provides a consolidated overview of cluster state and can be used for operational reporting or incident triage.
 
 ---
 
