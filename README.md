@@ -29,9 +29,20 @@ Useful for verifying hardware configuration across compute nodes.
 ---
 
 ### functions.sh
-Shared utility functions used across scripts.
-
-Includes validation helpers for HPC node naming conventions such as Cray xnames and slot identifiers.
+Shared utility library used by the HPC diagnostics scripts to simplify common operational tasks on HPE Cray EX systems. 
+The file provides reusable functions for xname validation and parsing, node and slot translation, scheduler interaction, Redfish API queries, BMC credential retrieval, and reservation management.
+The library standardises many routine tasks performed during cluster troubleshooting, including:
+Validating and parsing Cray xname identifiers (cabinet, chassis, slot, node, and BMC formats).
+Translating between NIDs and xnames using /etc/cray/nidX.
+Querying node state and metadata from PBS scheduler (pbsnodes).
+Automating node operations such as offline/online actions, comments, and reservation management.
+Discovering and selecting available login nodes for scheduler interaction.
+Identifying CPU architecture types (e.g. Milan vs Genoa) for targeted diagnostics.
+Performing Redfish API queries against node BMCs for hardware telemetry access.
+Retrieving BMC credentials via Cray SCSD services.
+Determining slot relationships such as sibling nodes and BMC mappings.
+These functions act as a common operational toolkit for higher-level scripts, enabling consistent interaction with cluster infrastructure components including compute nodes, BMCs, the scheduler, and system management services.
+Typical use cases include node triage, hardware fault investigation, scheduler state inspection, cluster maintenance operations, and automated diagnostics workflows across large-scale Linux HPC environments.
 
 ---
 
