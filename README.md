@@ -167,23 +167,24 @@ Typical use cases include slot-level health checks, identifying nodes that are u
 
 ## Example Workflow
 
-Operational Workflow
-
-The toolkit is designed to support a structured investigation workflow commonly used during HPC node triage and cluster incident response.
+The toolkit is designed to support a **structured investigation workflow** commonly used during HPC node triage and incident response.
 
 Rather than running scripts independently, operators typically follow a sequence of investigation stages.
 
-The workflow below illustrates a common diagnostic path.
+The workflow below illustrates a typical diagnostic path.
 
-1. Initialise Investigation Environment
+---
 
-Before beginning diagnostics, the investigation environment is initialised.
+### 1. Initialise Investigation Environment
 
-This resolves infrastructure metadata and prepares the shell session with consistent variables used by other scripts.
+Before beginning diagnostics, initialise the investigation environment.
 
+```bash
 source setup_env.sh
 
-This step automatically determines:
+This step resolves infrastructure metadata and prepares the shell session with consistent variables used by other scripts.
+
+The script automatically determines:
 
 node xname
 
@@ -193,11 +194,11 @@ slot and chassis location
 
 sibling nodes on the same blade
 
-The environment variables allow subsequent scripts to operate without repeatedly resolving infrastructure relationships.
+These variables allow other scripts to operate without repeatedly resolving infrastructure relationships.
 
 2. Inspect Scheduler and Platform State
 
-Next, the operator checks whether the node appears healthy from the perspective of the scheduler and platform management layer.
+Check whether the node appears healthy from both the scheduler and system management perspective.
 
 ./status_checker.sh
 
@@ -205,7 +206,7 @@ This correlates:
 
 PBS scheduler state
 
-SAT system management state
+SAT platform management state
 
 Typical issues identified at this stage include:
 
@@ -219,11 +220,11 @@ discrepancies between scheduler and platform views
 
 3. Perform Slot-Level Log Triage
 
-If infrastructure issues are suspected, logs from both BMC sides of the slot are scanned.
+If infrastructure issues are suspected, scan logs from both BMC sides of the slot.
 
 ./log_scan.sh
 
-This performs rapid keyword searches across:
+The script performs keyword searches across:
 
 /var/log/messages
 /var/log/n*/current
@@ -246,11 +247,11 @@ This step provides a quick overview of potential failure signals across all node
 
 4. Investigate Specific Log Events
 
-Once a potential failure indicator has been identified, deeper investigation can be performed using targeted log searches.
+Once a potential failure indicator is identified, deeper investigation can be performed using targeted log searches.
 
 ./log_search.sh -p "error" -A 50 -B 50
 
-This retrieves the most recent matching log entry and surrounding context, making it easier to understand the sequence of events that led to the failure.
+This retrieves the most recent matching log entry and surrounding context, helping operators understand the sequence of events leading to a failure.
 
 Typical investigations include:
 
@@ -264,13 +265,11 @@ node boot failures
 
 5. Verify Hardware Characteristics
 
-Hardware information can be validated to confirm expected configuration.
-
-Example:
+Hardware configuration can be validated during troubleshooting.
 
 ./cpu_type.sh <node>
 
-This identifies the CPU generation and processor details of the compute node, which can be useful when troubleshooting heterogeneous cluster environments.
+This identifies the CPU generation and processor details of the compute node, which is useful when diagnosing heterogeneous cluster environments.
 
 6. Check Memory Health
 
@@ -282,19 +281,19 @@ The script retrieves per-channel error counts and evaluates the results against 
 
 7. Investigate Fabric Connectivity
 
-If network issues are suspected, the Slingshot fabric can be inspected.
+If network instability is suspected, investigate Slingshot fabric ports associated with the node.
 
 ./link_flap_check.sh <xname>
 
-The script maps compute nodes to their associated switch ports and retrieves link flap information from fabric management services.
+The script maps compute nodes to their switch ports and retrieves link flap information from fabric management services.
 
-This is particularly useful when diagnosing:
+This is useful when diagnosing:
 
 HSN link instability
 
-network congestion symptoms
+intermittent connectivity
 
-intermittent connectivity failures
+network congestion symptoms
 
 8. Monitor Node Recovery
 
@@ -306,17 +305,17 @@ The script continuously checks connectivity for all nodes within a blade and rep
 
 9. Run Cluster Sweeps
 
-For broader cluster health monitoring, sweep utilities can be executed.
+For broader cluster health monitoring, cluster sweep utilities can be executed.
 
 ./run_sweeps.sh
 
 This runs multiple operational checks including:
 
-PBS node sweep
+PBS node sweeps
 
 node classification
 
-system-level cluster checks
+system-level infrastructure checks
 
 The output provides a consolidated overview of cluster state.
 
