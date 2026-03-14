@@ -2,20 +2,30 @@
 
 A collection of Bash utilities designed to assist with diagnosing and triaging node issues in large-scale Linux HPC clusters.
 
-The toolkit focuses on rapid infrastructure investigation by automating common operational tasks such as log analysis, node classification, scheduler state inspection, and hardware information gathering.
+The toolkit focuses on rapid infrastructure investigation by automating common operational tasks such as:
 
-These scripts were originally developed to streamline troubleshooting workflows across distributed HPC environments.
+- log analysis
+- node classification
+- scheduler state inspection
+- hardware information gathering
+- network diagnostics
+
+These tools were developed to streamline troubleshooting workflows across distributed HPC environments where manual investigation can involve multiple infrastructure layers including compute nodes, BMCs, schedulers, and fabric management systems.
+
+The scripts are designed to be lightweight, composable, and easily executed from standard Linux environments used to operate HPC clusters.
 
 ---
 
 ## Features
 
-• Remote CPU and hardware identification  
-• Node connectivity and availability checks  
-• Automated log scanning across nodes and BMC interfaces  
-• PBS scheduler node state parsing and reporting  
-• Node sweep classification to assist incident triage  
-• Environment setup for structured debugging sessions  
+• Remote CPU and hardware identification
+• Node connectivity and availability monitoring
+• Automated log scanning across nodes and BMC interfaces
+• PBS scheduler state inspection and parsing
+• Cluster sweep classification for operational triage
+• Environment setup for structured debugging sessions
+• Fabric diagnostics for Slingshot link stability
+• Memory ECC health inspection via ras-mc-ctl
 
 ---
 
@@ -157,29 +167,174 @@ Typical use cases include slot-level health checks, identifying nodes that are u
 
 ## Example Workflow
 
-Typical investigation flow:
+Operational Workflow
 
-1. Initialise ENVIRONMENT (Variables, paths, command prompt) 
+The toolkit is designed to support a structured investigation workflow commonly used during HPC node triage and cluster incident response.
+
+Rather than running scripts independently, operators typically follow a sequence of investigation stages.
+
+The workflow below illustrates a common diagnostic path.
+
+1. Initialise Investigation Environment
+
+Before beginning diagnostics, the investigation environment is initialised.
+
+This resolves infrastructure metadata and prepares the shell session with consistent variables used by other scripts.
 
 source setup_env.sh
 
-2. Inspect node status (PBS & SAT) 
+This step automatically determines:
 
-./status_check.sh x1102c7s2
+node xname
 
-3. Scan logs (latest keyword results) 
+BMC address
 
-./log_scan.sh x1102c7s2
+slot and chassis location
 
-4. Search BMC logs (specific string search to capture period of interest) 
+sibling nodes on the same blade
+
+The environment variables allow subsequent scripts to operate without repeatedly resolving infrastructure relationships.
+
+2. Inspect Scheduler and Platform State
+
+Next, the operator checks whether the node appears healthy from the perspective of the scheduler and platform management layer.
+
+./status_checker.sh
+
+This correlates:
+
+PBS scheduler state
+
+SAT system management state
+
+Typical issues identified at this stage include:
+
+nodes marked offline or drained
+
+configuration mismatches
+
+nodes failing to boot
+
+discrepancies between scheduler and platform views
+
+3. Perform Slot-Level Log Triage
+
+If infrastructure issues are suspected, logs from both BMC sides of the slot are scanned.
+
+./log_scan.sh
+
+This performs rapid keyword searches across:
+
+/var/log/messages
+/var/log/n*/current
+
+Common failure indicators include:
+
+hardware faults
+
+power events
+
+PCIe errors
+
+HSN fabric issues
+
+squashfs filesystem errors
+
+machine check exceptions (MCE / MCA)
+
+This step provides a quick overview of potential failure signals across all nodes in the slot.
+
+4. Investigate Specific Log Events
+
+Once a potential failure indicator has been identified, deeper investigation can be performed using targeted log searches.
 
 ./log_search.sh -p "error" -A 50 -B 50
+
+This retrieves the most recent matching log entry and surrounding context, making it easier to understand the sequence of events that led to the failure.
+
+Typical investigations include:
+
+power sequencing failures
+
+sensor alerts
+
+hardware telemetry errors
+
+node boot failures
+
+5. Verify Hardware Characteristics
+
+Hardware information can be validated to confirm expected configuration.
+
+Example:
+
+./cpu_type.sh <node>
+
+This identifies the CPU generation and processor details of the compute node, which can be useful when troubleshooting heterogeneous cluster environments.
+
+6. Check Memory Health
+
+Memory reliability can be assessed by querying ECC error counters.
+
+./memory_error_check.sh <node>
+
+The script retrieves per-channel error counts and evaluates the results against cluster health thresholds used by Node Health Check (NHC) policies.
+
+7. Investigate Fabric Connectivity
+
+If network issues are suspected, the Slingshot fabric can be inspected.
+
+./link_flap_check.sh <xname>
+
+The script maps compute nodes to their associated switch ports and retrieves link flap information from fabric management services.
+
+This is particularly useful when diagnosing:
+
+HSN link instability
+
+network congestion symptoms
+
+intermittent connectivity failures
+
+8. Monitor Node Recovery
+
+When nodes are rebooting or returning from maintenance, their availability can be monitored.
+
+./ping_nodes.sh
+
+The script continuously checks connectivity for all nodes within a blade and reports when they become reachable.
+
+9. Run Cluster Sweeps
+
+For broader cluster health monitoring, sweep utilities can be executed.
+
+./run_sweeps.sh
+
+This runs multiple operational checks including:
+
+PBS node sweep
+
+node classification
+
+system-level cluster checks
+
+The output provides a consolidated overview of cluster state.
 
 ---
 
 ## Purpose
 
-These tools were created to improve the efficiency of diagnosing infrastructure issues in distributed Linux HPC environments by reducing repetitive manual investigation tasks.
+These tools were created to improve the efficiency of diagnosing infrastructure issues in distributed Linux HPC environments.
+
+By automating repetitive investigative tasks, the toolkit helps operators:
+
+identify faults faster
+
+correlate failures across infrastructure layers
+
+reduce manual log inspection
+
+standardise operational troubleshooting workflows
 
 ---
 
