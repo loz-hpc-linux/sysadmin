@@ -214,8 +214,8 @@ Check whether the node appears healthy from both the scheduler and system manage
 
 This correlates:
 
-PBS scheduler state  
-SAT platform management state  
+- PBS scheduler state  
+- SAT platform management state  
 
 Typical issues identified at this stage include:
 
