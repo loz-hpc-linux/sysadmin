@@ -37,13 +37,10 @@ These tools were created to improve the efficiency of diagnosing infrastructure 
 
 By automating repetitive investigative tasks, the toolkit helps operators:
 
-identify faults faster
-
-correlate failures across infrastructure layers
-
-reduce manual log inspection
-
-standardise operational troubleshooting workflows
+- identify faults faster
+- correlate failures across infrastructure layers
+- reduce manual log inspection
+- standardise operational troubleshooting workflows
 
 ---
 
