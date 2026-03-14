@@ -7,7 +7,7 @@ echo
 #############################################
 print_help() {
 cat <<'EOF'
-fabric_port_check.sh
+link_flap_check.sh
 
 Description:
   Queries topology.json via the fabric management shell to:
@@ -15,15 +15,15 @@ Description:
     2) Run show-flaps and fabric status checks for each discovered port
 
 Usage:
-  fabric_port_check.sh <XNAME>
-  fabric_port_check.sh <comma-separated-xnames>
-  fabric_port_check.sh <space-separated-xnames>
-  fabric_port_check.sh -h | --help
+  link_flap_check.sh <XNAME>
+  link_flap_check.sh <comma-separated-xnames>
+  link_flap_check.sh <space-separated-xnames>
+  link_flap_check.sh -h | --help
 
 Examples:
-  fabric_port_check.sh x1000c2s6b0n1
-  fabric_port_check.sh x1000c2s6b0n0,x1000c2s6b0n1,x1000c2s6b1n0,x1000c2s6b1n1
-  fabric_port_check.sh "x1000c2s6b0n0 x1000c2s6b0n1 x1000c2s6b1n0 x1000c2s6b1n1"
+  link_flap_check.sh x1000c2s6b0n1
+  link_flap_check.sh x1000c2s6b0n0,x1000c2s6b0n1,x1000c2s6b1n0,x1000c2s6b1n1
+  link_flap_check.sh "x1000c2s6b0n0 x1000c2s6b0n1 x1000c2s6b1n0 x1000c2s6b1n1"
 
 Notes:
   • No files are left behind (a temp file may be created under /tmp and is deleted on exit).
