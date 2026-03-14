@@ -12,7 +12,7 @@ Usage:
   log_scan_slot.sh <SLOT>
 
 Description:
-  Runs a set of standard greps over /var/log/n*/current and /var/log/messages
+  Runs a set of standard greps over /var/log/n*/* and /var/log/messages
   on both sides of a slot (<SLOT>b0 and <SLOT>b1) via SSH.
 
 Arguments:
@@ -95,13 +95,13 @@ echo
 ########## LOG SEARCHES ##########
 
 for side in b0 b1; do
-  run_search "FAILED in /var/log/n*/current on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'failed' /var/log/n*/current | tail -n 20\""
-  run_search "ERROR in /var/log/n*/current on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'error' /var/log/n*/current | tail -n 20\""
-  run_search "HSN in /var/log/n*/current on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'hsn' /var/log/n*/current | tail -n 20\""
-  run_search "PCIe in /var/log/n*/current on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'PCIe' /var/log/n*/current | tail -n 20\""
-  run_search "MCA in /var/log/n*/current on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'MCA' /var/log/n*/current | tail -n 10\""
-  run_search "MCE in /var/log/n*/current on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'MCE' /var/log/n*/current | tail -n 10\""
-  run_search "SQUASHFS in /var/log/n*/current on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'squashfs' /var/log/n*/current | tail -n 10\""
+  run_search "FAILED in /var/log/n*/* on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'failed' /var/log/n*/* | tail -n 20\""
+  run_search "ERROR in /var/log/n*/* on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'error' /var/log/n*/* | tail -n 20\""
+  run_search "HSN in /var/log/n*/* on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'hsn' /var/log/n*/* | tail -n 20\""
+  run_search "PCIe in /var/log/n*/* on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'PCIe' /var/log/n*/* | tail -n 20\""
+  run_search "MCA in /var/log/n*/* on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'MCA' /var/log/n*/* | tail -n 10\""
+  run_search "MCE in /var/log/n*/* on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'MCE' /var/log/n*/* | tail -n 10\""
+  run_search "SQUASHFS in /var/log/n*/* on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'squashfs' /var/log/n*/* | tail -n 10\""
 
   run_search "FAILED in /var/log/messages on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'failed' /var/log/messages | tail -n 20\""
   run_search "ERROR in /var/log/messages on ${SLOT}${side}" "ssh ${SLOT}${side} \"grep -Ei 'error' /var/log/messages | tail -n 20\""
