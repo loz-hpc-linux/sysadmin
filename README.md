@@ -107,10 +107,13 @@ Typical use cases include incident response, node triage sessions, infrastructur
 
 ---
 
-### status_check.sh
-Checks both PBS node status and system health state for nodes within a specified slot.
-
-Provides a quick operational snapshot for infrastructure engineers.
+### status_checker.sh
+Checks the operational state of nodes within a specified slot by querying both the PBS scheduler and the SAT (System Admin Toolkit) management interface. 
+The script provides a quick infrastructure health snapshot by correlating scheduler node states with the platform management view of the same nodes.
+After validating that the required environment variables are set, the script retrieves node information from PBS via the appropriate login node and filters the results for the specified slot. 
+It then runs a SAT query to display the system-level status of the corresponding nodes, including attributes such as xname, role, state, network status, boot state, and configuration status.
+By presenting scheduler and platform management data together, the script helps operators quickly determine whether nodes are healthy, misconfigured, offline, or failing to boot, and whether discrepancies exist between the scheduler and system management layers.
+Typical use cases include slot-level health checks, identifying nodes that are unavailable to the scheduler, verifying system configuration after maintenance, and investigating cases where nodes appear operational but are not marked ready in cluster management tools.
 
 ---
 
