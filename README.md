@@ -89,9 +89,11 @@ Typical use cases include inspecting scheduler state during node triage, verifyi
 ---
 
 ### ping_nodes.sh
-Checks connectivity across nodes within a blade or slot.
-
-Reports reachability and assists in identifying partially failing hardware groups.
+Monitors the network reachability of all compute nodes associated with a blade by repeatedly pinging each node and reporting its online status. 
+The script determines the blade layout using the $NODES_XNAME environment variable and automatically selects the correct node pattern for either Windom or Antero blades.
+Once the node list is derived from the provided xname, the script continuously checks each node using ICMP ping and prints a live status summary indicating whether nodes are responding. 
+The loop continues until all nodes on the blade become reachable, making it useful for tracking node recovery during power operations, boot sequences, or maintenance work.
+Typical use cases include monitoring node availability during blade bring-up, verifying cluster recovery after maintenance, and confirming that all nodes within a slot have returned to network reachability.
 
 ---
 
