@@ -208,7 +208,7 @@ These environment variables allow subsequent scripts to operate without repeated
 
 Check whether the node appears healthy from both the scheduler and system management perspective.
 
-./status_checker.sh
+./status_checker.sh $SLOT
 
 This correlates:
 
@@ -228,7 +228,7 @@ Typical issues identified at this stage include:
 
 If infrastructure issues are suspected, logs from both BMC sides of the slot are scanned.
 
-./log_scan.sh
+./log_scan.sh $SLOT
 
 The script performs rapid keyword searches across:
 
@@ -269,7 +269,7 @@ Typical investigations include:
 
 Hardware configuration can be validated during troubleshooting.
 
-./cpu_type.sh <node>
+./cpu_type.sh $XNAME
 
 This identifies the CPU generation and processor details of the compute node, which is useful when diagnosing heterogeneous cluster environments.
 
@@ -279,7 +279,7 @@ This identifies the CPU generation and processor details of the compute node, wh
 
 Memory reliability can be assessed by querying ECC error counters.
 
-./memory_error_check.sh <node>
+./memory_error_check.sh $XNAME
 
 The script retrieves per-channel error counts and evaluates results against cluster health thresholds used by Node Health Check (NHC) policies.
 
@@ -289,7 +289,7 @@ The script retrieves per-channel error counts and evaluates results against clus
 
 If network instability is suspected, investigate Slingshot fabric ports associated with the node.
 
-./link_flap_check.sh <xname>
+./link_flap_check.sh $XNAME
 
 The script maps compute nodes to their corresponding switch ports and retrieves link flap information from fabric management services.
 
@@ -305,7 +305,7 @@ Typical use cases include diagnosing:
 
 When nodes are rebooting or returning from maintenance, their availability can be monitored.
 
-./ping_nodes.sh
+./ping_nodes.sh $XNAME
 
 The script continuously checks connectivity for all nodes within a blade and reports when they become reachable.
 
