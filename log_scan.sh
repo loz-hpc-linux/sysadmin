@@ -17,7 +17,7 @@ Description:
 
 Arguments:
   SLOT          Slot identifier that resolves via the node mapping file
-                Example: x1102c7s2  (script will SSH to x1102c7s2b0 and x1102c7s2b1)
+                Example: $SLOT  (script will SSH to ${Slot}b0 and ${SLOT}b1)
 
 Options:
   -h, --help    Show this help menu and exit
@@ -28,7 +28,7 @@ Notes:
   - cluset must be available for the NODES_* expansions.
 
 Examples:
-  ./log_scan_slot.sh x1102c7s2
+  ./log_scan_slot.sh $SLOT
 EOF
 }
 
