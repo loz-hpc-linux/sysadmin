@@ -20,11 +20,6 @@ Usage:
   link_flap_check.sh <space-separated-xnames>
   link_flap_check.sh -h | --help
 
-Examples:
-  link_flap_check.sh x1000c2s6b0n1
-  link_flap_check.sh x1000c2s6b0n0,x1000c2s6b0n1,x1000c2s6b1n0,x1000c2s6b1n1
-  link_flap_check.sh "x1000c2s6b0n0 x1000c2s6b0n1 x1000c2s6b1n0 x1000c2s6b1n1"
-
 Notes:
   • No files are left behind (a temp file may be created under /tmp and is deleted on exit).
   • Duplicate ports are automatically filtered.
@@ -64,7 +59,7 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
 fi
 
 ARG="${1:-}"
-[[ -n "$ARG" ]] || die "No target provided. Example: fabric_port_check.sh \$XNAME"
+[[ -n "$ARG" ]] || die "No target provided. Example: link_flap_check.sh \$XNAME"
 
 #############################################
 # Fabric management execution wrapper
