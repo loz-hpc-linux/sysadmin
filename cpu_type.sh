@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: ./cpu_type.sh x1003c1s7b0n0
+# Usage: ./cpu_type.sh $XNAME
 
 set -euo pipefail
 
